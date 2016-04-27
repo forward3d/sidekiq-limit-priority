@@ -4,14 +4,19 @@ module Sidekiq::LimitFetch::Queues
   THREAD_KEY = :acquired_queues
 
   def start(options)
-    @queues    = options[:queues]
-    @dynamic   = options[:dynamic]
+    @priorities = options[:priorities]
+    @queues     = options[:queues]
+    @dynamic    = options[:dynamic]
 
     options[:strict] ? strict_order! : weighted_order!
 
     set :process_limit, options[:process_limits]
     set :limit, options[:limits]
     set_blocks options[:blocking]
+  end
+
+  def priorities
+    @priorities || [:normal]
   end
 
   def acquire

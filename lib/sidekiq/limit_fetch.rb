@@ -2,6 +2,8 @@ require 'forwardable'
 require 'sidekiq'
 require 'sidekiq/manager'
 require 'sidekiq/api'
+require 'sidekiq/client'
+require_relative 'client_ext'
 
 module Sidekiq::LimitFetch
   autoload :UnitOfWork, 'sidekiq/limit_fetch/unit_of_work'
@@ -21,7 +23,7 @@ module Sidekiq::LimitFetch
   end
 
   def retrieve_work
-    queue, job = redis_brpop *Queues.acquire, Sidekiq::BasicFetch::TIMEOUT
+    queue, job = redis_brpop *Queues.acquire
     Queues.release_except(queue)
     UnitOfWork.new(queue, job) if job
   end
@@ -30,10 +32,30 @@ module Sidekiq::LimitFetch
     Sidekiq::BasicFetch.bulk_requeue(*args)
   end
 
+  def priority_key_boundary
+    '_priority_'
+  end
+
   private
 
+  def prioritized_queues(queues)
+    queues.map do |queue|
+      Sidekiq::LimitFetch::Queues.priorities.map { |priority| "#{queue}#{priority_key_boundary}#{priority}"}
+    end.flatten
+  end
+  
+  def original_queue(queue)
+    return queue unless queue
+    queue.split(priority_key_boundary)[0]
+  end
+  
   def redis_brpop(*args)
     return if args.size < 2
-    Sidekiq.redis {|it| it.brpop *args }
+    queues = prioritized_queues(args)
+    p [queues, Sidekiq::BasicFetch::TIMEOUT].flatten
+    queue, job = Sidekiq.redis {|it| it.brpop *[queues, Sidekiq::BasicFetch::TIMEOUT].flatten }
+    queue = original_queue(queue)
+    p queue
+    [queue, job]
   end
 end
