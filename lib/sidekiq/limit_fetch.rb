@@ -3,7 +3,6 @@ require 'sidekiq'
 require 'sidekiq/manager'
 require 'sidekiq/api'
 require 'sidekiq/client'
-require_relative 'client_ext'
 
 module Sidekiq::LimitFetch
   autoload :UnitOfWork, 'sidekiq/limit_fetch/unit_of_work'
@@ -15,6 +14,7 @@ module Sidekiq::LimitFetch
   require_relative 'limit_fetch/global/monitor'
   require_relative 'extensions/queue'
   require_relative 'extensions/manager'
+  require_relative 'extensions/client'
 
   extend self
 
