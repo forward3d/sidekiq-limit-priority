@@ -12,7 +12,7 @@ module Sidekiq
         now = Time.now.to_f
         ts = (int < 1_000_000_000 ? now + int : int)
 
-        queue = "#{queue}_#{priority}"
+        queue = "#{queue}#{Sidekiq::LimitFetch.priority_key_boundary}#{priority}"
 
         item = { 'class' => klass, 'args' => args, 'at' => ts, 'queue' => queue }
         item.delete('at'.freeze) if ts <= now
