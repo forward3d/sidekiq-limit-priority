@@ -16,7 +16,7 @@ module Sidekiq::LimitFetch::Queues
   end
 
   def priorities
-    @priorities || [:normal]
+    @priorities || []
   end
 
   def acquire
