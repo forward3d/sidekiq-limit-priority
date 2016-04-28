@@ -14,7 +14,7 @@ Gem::Specification.new do |gem|
 
   gem.files         = `git ls-files`.split($/)
   gem.test_files    = gem.files.grep %r{^spec/}
-  gem.require_paths = 'lib'
+  gem.require_paths = ['lib']
 
   gem.add_dependency 'sidekiq', '>= 4'
   gem.add_development_dependency 'redis-namespace', '~> 1.5', '>= 1.5.2'
