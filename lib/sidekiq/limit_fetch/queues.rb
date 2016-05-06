@@ -7,6 +7,7 @@ module Sidekiq::LimitFetch::Queues
     @priorities = options[:priorities]
     @queues     = options[:queues]
     @dynamic    = options[:dynamic]
+    @rotation   = options[:queues]
 
     options[:strict] ? strict_order! : weighted_order!
 
@@ -47,7 +48,7 @@ module Sidekiq::LimitFetch::Queues
   end
 
   def weighted_order!
-    def ordered_queues; @queues.shuffle.uniq end
+    def ordered_queues; @rotation.push(@rotation.shift) end
   end
 
   def namespace
